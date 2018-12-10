@@ -19,7 +19,6 @@ def requestToURL(url):
     request.close()
     return json.loads(response)
 
-
 def getData():
     
     # Generating URL with prefered unit and with own API_KEY
@@ -33,8 +32,8 @@ def getData():
     # Getting date from python lib
     todayDate = datetime.datetime.today()
     todayDate = todayDate.strftime('%d/%m/%y')
-    now = datetime.datetime.now().time()
-    now = now.strftime('%H:%M:%S')
+    timeNow = datetime.datetime.now().time()
+    timeNow = timeNow.strftime('%H:%M:%S')
 
 
     # Parsing data from request
@@ -45,13 +44,13 @@ def getData():
 
     # Checking infos
     print('Date: ' + todayDate)
-    print('Time: ' + now)
+    print('Time: ' + timeNow)
     #tu print('Timestamp: %d ' % timestamp)
     print('Temperature: ' + temperature)
     print('Weather: ' + weather)
     print('Humidity: ' + humidity)
 
-    data = todayDate + ';' + now + ';' + temperature + ';' + weather + ';' + humidity
+    data = todayDate + ';' + timeNow + ';' + temperature + ';' + weather + ';' + humidity
 
     return data
 
@@ -68,6 +67,7 @@ def main():
         info = getData()
         print('Enviando informações para serial\n')
         arduinoSerial.write(str(info).encode())
+        # Must change to 3600 for an hour delay
         time.sleep(60)
 
 
