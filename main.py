@@ -4,7 +4,7 @@ from config import *
 import urllib.request
 import json
 import datetime
-# import serial
+import serial
 import time
 
 def urlBuild():
@@ -32,13 +32,17 @@ def main():
     
     now = datetime.datetime.now().time()
     now = now.strftime('%H:%M:%S')
+    temp = str(jsonResponse['main']['temp']) + ' C'
+    weather = jsonResponse['weather'][0]['description']
+    humi = str(jsonResponse['main']['humidity']) + '%'
 
     print('Date: ' + todayDate)
     print('Time: ' + now)
-    print('Temperature: ' + str(jsonResponse['main']['temp']) + ' C')
-    print('Weather: ' + jsonResponse['weather'][0]['description'] + '\n')
-    
-    temp = str(jsonResponse['main']['temp']) + ' C'
+    print('Temperature: ' + temp)
+    print('Weather: ' + weather)
+    print('Humidity: ' + humi)
+
+    print('\n')
 
     # print(arduinoSerial.portstr)
     print('Enviando para serial\n')
