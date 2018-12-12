@@ -16,7 +16,6 @@ const int rs = 12, en = 11, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 int buttonState = 1;
 int variavel = 0;
 
-unsigned int VSF = 60;
 String info;
 char data[100];
 int pctime;
@@ -35,7 +34,7 @@ void setup() {
   pinMode(13, OUTPUT);
   
   // Synchronize the time of arduino with the external 
-  setSyncProvider(requestSync);  
+//  setSyncProvider(requestSync);  
   
   // setting button pin (2) as input
   pinMode(button,INPUT);
@@ -49,15 +48,13 @@ void loop() {
   buttonState = digitalRead(button);
   if (buttonState == HIGH && variavel == 0){
     variavel = 1;
-    digitalClockDisplay();  
   }
   else if (buttonState == HIGH && variavel == 1){
     variavel = 0;
-    chupa();
   }
 
   if(variavel == 0)
-    chupa();
+    weatherDisplay();
   else
     digitalClockDisplay();
   
@@ -65,13 +62,14 @@ void loop() {
   delay(1000);
 }
 
-void chupa(){
+void weatherDisplay(){
     lcd.clear();
 
     // Display time on first row   
     lcd.setCursor(0, 0);
     lcd.print(temp);
-    lcd.print(" / ");
+    lcd.print(" / H ");
+    lcd.print(humState);
     lcd.setCursor(0, 1);
     lcd.print(skyState);
  
@@ -109,24 +107,20 @@ void printDigits(int digits){
 void processSyncMessage() {
   unsigned long pctime;
   const unsigned long DEFAULT_TIME = 1534600000; // Jan 1 2013
-  
-  if(Serial.find(TIME_HEADER)) {
-    info = Serial.readString();
-    info.toCharArray(data, sizeof(data));
-    timeStamp = strtok(data, ";");
-    temp = strtok(NULL, ";");
-    skyState = strtok(NULL, ";");
-    humState = strtok(NULL, ";");
-    
-    pctime = timeStamp.toInt();
-     if( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
-       setTime(pctime); // Sync Arduino clock to the time received on the serial port
-     }
+  while(1){
+    if(Serial.find(TIME_HEADER)) {
+      info = Serial.readString();
+      info.toCharArray(data, sizeof(data));
+      timeStamp = strtok(data, ";");
+      temp = strtok(NULL, ";");
+      skyState = strtok(NULL, ";");
+      humState = strtok(NULL, ";");
+      
+      pctime = timeStamp.toInt();
+       if( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
+         setTime(pctime); // Sync Arduino clock to the time received on the serial port
+       }
+    }
+    break;
   }
-}
-
-time_t requestSync()
-{
-  Serial.write(TIME_REQUEST);  
-  return 0; // the time will be sent later in response to serial mesg
 }
