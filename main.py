@@ -3,12 +3,14 @@ URL = 'http://api.openweathermap.org/data/2.5/weather?'
 CITY_NAME = 'Maringá'
 CITY_ID = '6322863'
 UNITS = 'metric'
+timeStamp = 0.0
 
 import urllib.request
 import json
 import datetime
 import serial
 import time
+import math
 
 def urlBuild():
     return URL + '&id=' + str(CITY_ID) + '&units=' + UNITS + '&appid=' + API_KEY
@@ -41,7 +43,12 @@ def getData():
     weather = jsonResponse['weather'][0]['description']
     humidity = str(jsonResponse['main']['humidity']) + '%'
     # timestamp = jsonResponse['dt']
+    timeStamp = time.time()
+    trash, timeStamp = math.modf(timeStamp)
+    timeStamp = int(timeStamp-7180)
+    timeNow = 'T' + str(timeStamp)
 
+    print (timeNow)
     # Checking infos
     print('Date: ' + todayDate)
     print('Time: ' + timeNow)
@@ -50,25 +57,32 @@ def getData():
     print('Weather: ' + weather)
     print('Humidity: ' + humidity)
 
-    data = todayDate + ';' + timeNow + ';' + temperature + ';' + weather + ';' + humidity
+    data = timeNow + ';' + temperature + ';' + weather + ';' + humidity
 
     return data
 
 def main():
     arduinoSerial = serial.Serial('/dev/ttyACM0', 9600)
-
     time.sleep(1.8)
-
     # Checking arduino port
     print('\n')
     print(arduinoSerial.portstr)
-    
+
+    # info = getData()
+    # time.sleep(2)
+    # print('Enviando informações para serial\n')
+    # print(info)
+    # arduinoSerial.write(str(info).encode())
+    # # Must change to 3600 for an hour delay
+    # # time.sleep(3600)
     while 1:
+        print('IUASHDUIHAUSIH')
         info = getData()
         print('Enviando informações para serial\n')
+        print(info)
         arduinoSerial.write(str(info).encode())
-        # Must change to 3600 for an hour delay
-        time.sleep(60)
+        time.sleep(30)
+            # Must change to 3600 for an hour delay
 
 
 if __name__ == '__main__':

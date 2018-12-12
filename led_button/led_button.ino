@@ -13,7 +13,18 @@ const int button = 2;
 const int rs = 12, en = 11, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 
 // button state (0 LOW, 1 HIGH).
-int buttonState = 0;
+int buttonState = 1;
+int variavel = 0;
+
+unsigned int VSF = 60;
+String info;
+char data[100];
+int pctime;
+String timeStamp;
+String temp;
+String skyState;
+String humState;
+
 
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
@@ -21,56 +32,69 @@ void setup() {
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   Serial.begin(9600);
-  while (!Serial) ; // Needed for Leonardo only
   pinMode(13, OUTPUT);
-  setSyncProvider( requestSync);  //set function to call when sync required
-  Serial.println("Waiting for sync message");
-  lcd.print("Loading.....");
-  //lcd.print("hello, world!");
+  
+  // Synchronize the time of arduino with the external 
+  setSyncProvider(requestSync);  
+  
   // setting button pin (2) as input
   pinMode(button,INPUT);
 }
 
 void loop() {
-  if (Serial.available()) {
+  if (Serial.read()) {
     processSyncMessage();
   }
-  if (timeStatus()!= timeNotSet) {
+  
+  buttonState = digitalRead(button);
+  if (buttonState == HIGH && variavel == 0){
+    variavel = 1;
     digitalClockDisplay();  
   }
-  if (timeStatus() == timeSet) {
-    digitalWrite(13, HIGH); // LED on if synced
-  } else {
-    digitalWrite(13, LOW);  // LED off if needs refresh
+  else if (buttonState == HIGH && variavel == 1){
+    variavel = 0;
+    chupa();
   }
+
+  if(variavel == 0)
+    chupa();
+  else
+    digitalClockDisplay();
+  
+  
   delay(1000);
-  // set the cursor to column 0, line 1
-  // (note: line 1 is the second row, since counting begins with 0):
-  lcd.setCursor(0, 0);
 }
 
+void chupa(){
+    lcd.clear();
+
+    // Display time on first row   
+    lcd.setCursor(0, 0);
+    lcd.print(temp);
+    lcd.print(" / ");
+    lcd.setCursor(0, 1);
+    lcd.print(skyState);
+ 
+}
 void digitalClockDisplay(){
-  // digital clock display of the time
-  lcd.print("Time ");
-  lcd.print(hour());
-  Serial.print(hour());
-  printDigits(minute());
-  printDigits(second());
-  lcd.setCursor(0, 1);
-  lcd.print("Date ");
-  lcd.print(day());
-  lcd.print("/");
-  lcd.print(month());
-  lcd.print("/");
-  lcd.print(year()); 
-   
-  Serial.print(" ");
-  Serial.print(day());
-  Serial.print(" ");
-  Serial.print(month());
-  Serial.print(" ");
-  Serial.print(year()); 
-  Serial.println(); 
+    lcd.clear();
+
+    // Display time on first row   
+    lcd.setCursor(0, 0);
+//    
+    lcd.print("Time ");
+    lcd.print(hour());
+    printDigits(minute());
+    printDigits(second());
+
+    // Display date on second row
+    lcd.setCursor(0, 1);
+    lcd.print("Date ");
+    lcd.print(day());
+    lcd.print("/");
+    lcd.print(month());
+    lcd.print("/");
+    lcd.print(year()); 
 }
 
 void printDigits(int digits){
@@ -84,10 +108,17 @@ void printDigits(int digits){
 
 void processSyncMessage() {
   unsigned long pctime;
-  const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
-
+  const unsigned long DEFAULT_TIME = 1534600000; // Jan 1 2013
+  
   if(Serial.find(TIME_HEADER)) {
-     pctime = Serial.parseInt();
+    info = Serial.readString();
+    info.toCharArray(data, sizeof(data));
+    timeStamp = strtok(data, ";");
+    temp = strtok(NULL, ";");
+    skyState = strtok(NULL, ";");
+    humState = strtok(NULL, ";");
+    
+    pctime = timeStamp.toInt();
      if( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
        setTime(pctime); // Sync Arduino clock to the time received on the serial port
      }
