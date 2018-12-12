@@ -7,7 +7,14 @@
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+
+// button connected to pin 2 
+const int button = 2;
+const int rs = 12, en = 11, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
+
+// button state (0 LOW, 1 HIGH).
+int buttonState = 0;
+
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 void setup() {
@@ -20,6 +27,8 @@ void setup() {
   Serial.println("Waiting for sync message");
   lcd.print("Loading.....");
   //lcd.print("hello, world!");
+  // setting button pin (2) as input
+  pinMode(button,INPUT);
 }
 
 void loop() {
